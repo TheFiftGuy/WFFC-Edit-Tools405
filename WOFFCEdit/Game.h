@@ -13,6 +13,8 @@
 #include "InputCommands.h"
 #include <vector>
 
+#include "Camera.h"
+
 
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
@@ -67,18 +69,20 @@ private:
 	//tool specific
 	std::vector<DisplayObject>			m_displayList;
 	DisplayChunk						m_displayChunk;
-	InputCommands						m_InputCommands;
+	//InputCommands						m_InputCommands;
 
-	//functionality
-	float								m_movespeed;
+	////functionality
+	//float								m_movespeed;
 
-	//camera
-	DirectX::SimpleMath::Vector3		m_camPosition;
-	DirectX::SimpleMath::Vector3		m_camOrientation;
-	DirectX::SimpleMath::Vector3		m_camLookAt;
-	DirectX::SimpleMath::Vector3		m_camLookDirection;
-	DirectX::SimpleMath::Vector3		m_camRight;
-	float m_camRotRate;
+	////camera
+	//DirectX::SimpleMath::Vector3		m_camPosition;
+	//DirectX::SimpleMath::Vector3		m_camOrientation;
+	//DirectX::SimpleMath::Vector3		m_camLookAt;
+	//DirectX::SimpleMath::Vector3		m_camLookDirection;
+	//DirectX::SimpleMath::Vector3		m_camRight;
+	//float m_camRotRate;
+	std::unique_ptr<Camera>       m_camera;
+
 
 	//control variables
 	bool m_grid;							//grid rendering on / off
@@ -92,6 +96,8 @@ private:
     std::unique_ptr<DirectX::GamePad>       m_gamePad;
     std::unique_ptr<DirectX::Keyboard>      m_keyboard;
     std::unique_ptr<DirectX::Mouse>         m_mouse;
+
+
 
     // DirectXTK objects.
     std::unique_ptr<DirectX::CommonStates>                                  m_states;
@@ -123,7 +129,7 @@ private:
 #endif
 
     DirectX::SimpleMath::Matrix                                             m_world;
-    DirectX::SimpleMath::Matrix                                             m_view;
+    //DirectX::SimpleMath::Matrix                                             m_view;
     DirectX::SimpleMath::Matrix                                             m_projection;
 
 
