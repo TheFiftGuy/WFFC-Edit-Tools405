@@ -61,16 +61,16 @@ void Camera::Update(DX::StepTimer const& timer)
 	//	m_camOrientation.y += m_camRotRate;
 	//}
 
-	if (m_InputCommands->mousePosX > 0 || m_InputCommands->mousePosY > 0) {
+	if ((m_InputCommands->mouse_x > 0 || m_InputCommands->mouse_y > 0) && m_InputCommands->mouse_RB_Down == true) {
 
 		if (prevMouseX <= 0 && prevMouseY <= 0) {
 			//if no previous, use current as previous and dont move cam until next frame
-			prevMouseX = m_InputCommands->mousePosX;
-			prevMouseY = m_InputCommands->mousePosY;
+			prevMouseX = m_InputCommands->mouse_x;
+			prevMouseY = m_InputCommands->mouse_y;
 			return;
 		}
-		float deltaX = m_InputCommands->mousePosX - prevMouseX;
-		float deltaY = m_InputCommands->mousePosY - prevMouseY;
+		float deltaX = m_InputCommands->mouse_x - prevMouseX;
+		float deltaY = m_InputCommands->mouse_y - prevMouseY;
 
 		deltaX *= m_camSensitivity;
 		deltaY *= m_camSensitivity;
@@ -93,8 +93,8 @@ void Camera::Update(DX::StepTimer const& timer)
 		}
 
 
-		prevMouseX = m_InputCommands->mousePosX;
-		prevMouseY = m_InputCommands->mousePosY;
+		prevMouseX = m_InputCommands->mouse_x;
+		prevMouseY = m_InputCommands->mouse_y;
 	}
 	else {
 		prevMouseX = 0;

@@ -33,6 +33,9 @@ public:
 	void Tick(InputCommands * Input);
 	void Render();
 
+	//D mouse picking
+	int MousePicking();
+
 	// Rendering helpers
 	void Clear();
 
@@ -69,7 +72,7 @@ private:
 	//tool specific
 	std::vector<DisplayObject>			m_displayList;
 	DisplayChunk						m_displayChunk;
-	//InputCommands						m_InputCommands;
+	InputCommands*						m_InputCommands;
 
 	////functionality
 	//float								m_movespeed;
@@ -83,6 +86,7 @@ private:
 	//float m_camRotRate;
 	std::unique_ptr<Camera>       m_camera;
 
+	RECT								m_ScreenDimensions;
 
 	//control variables
 	bool m_grid;							//grid rendering on / off

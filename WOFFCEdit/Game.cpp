@@ -86,6 +86,8 @@ void Game::Initialize(HWND window, int width, int height)
     m_deviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
 
+	GetClientRect(window, &m_ScreenDimensions);
+
 #ifdef DXTK_AUDIO
     // Create DirectXTK for Audio objects
     AUDIO_ENGINE_FLAGS eflags = AudioEngine_Default;
@@ -120,9 +122,9 @@ void Game::SetGridState(bool state)
 void Game::Tick(InputCommands *Input)
 {
 	//copy over the input commands so we have a local version to use elsewhere.
-	//m_InputCommands = *Input;
+	m_InputCommands = Input;
 	//D insert camera set input
-	m_camera->SetInputCommand(Input);
+	m_camera->SetInputCommand(m_InputCommands);
 
     m_timer.Tick([&]()
     {
@@ -189,7 +191,7 @@ void Game::Update(DX::StepTimer const& timer)
 	//m_camLookAt = m_camPosition + m_camLookDirection;
 
 	////apply camera vectors
- //   m_view = Matrix::CreateLookAt(m_camPosition, m_camLookAt, Vector3::UnitY);
+    //m_view = Matrix::CreateLookAt(m_camPosition, m_camLookAt, Vector3::UnitY);
 
 	m_camera->Update(timer);
 
@@ -288,6 +290,62 @@ void Game::Render()
 
     m_deviceResources->Present();
 }
+
+int Game::MousePicking()
+{
+	int selectedID = -1;
+	int nearestSelectedID = -1;
+	float pickedDistance = 0.0f;
+	float nearestPickedDistance = 100000000.0f;
+
+	//setup near and far planes of frustum with mouse X and mouse y passed down from Toolmain. 
+		//they may look the same but note, the difference in Z
+	
+	const XMVECTOR nearSource = XMVectorSet(m_InputCommands->mouse_x, m_InputCommands->mouse_y, 0.0f, 1.0f);
+	const XMVECTOR farSource = XMVectorSet(m_InputCommands->mouse_x, m_InputCommands->mouse_y, 1.0f, 1.0f);
+
+	//Loop through entire display list of objects and pick with each in turn. 
+	for (int i = 0; i < m_displayList.size(); i++)
+	{
+		//Get the scale factor and translation of the object
+		const XMVECTORF32 scale = { m_displayList[i].m_scale.x,		m_displayList[i].m_scale.y,		m_displayList[i].m_scale.z };
+		const XMVECTORF32 translate = { m_displayList[i].m_position.x,		m_displayList[i].m_position.y,	m_displayList[i].m_position.z };
+
+		//convert euler angles into a quaternion for the rotation of the object
+		XMVECTOR rotate = Quaternion::CreateFromYawPitchRoll(m_displayList[i].m_orientation.y * 3.1415 / 180, m_displayList[i].m_orientation.x * 3.1415 / 180,
+			m_displayList[i].m_orientation.z * 3.1415 / 180);
+
+		//create set the matrix of the selected object in the world based on the translation, scale and rotation.
+		XMMATRIX local = m_world * XMMatrixTransformation(g_XMZero, Quaternion::Identity, scale, g_XMZero, rotate, translate);
+
+		//Unproject the points on the near and far plane, with respect to the matrix we just created.
+		XMVECTOR nearPoint = XMVector3Unproject(nearSource, 0.0f, 0.0f, m_ScreenDimensions.right, m_ScreenDimensions.bottom, m_deviceResources->GetScreenViewport().MinDepth, m_deviceResources->GetScreenViewport().MaxDepth, m_projection, m_camera->GetCameraViewMat(), local);
+
+		XMVECTOR farPoint = XMVector3Unproject(farSource, 0.0f, 0.0f, m_ScreenDimensions.right, m_ScreenDimensions.bottom, m_deviceResources->GetScreenViewport().MinDepth, m_deviceResources->GetScreenViewport().MaxDepth, m_projection, m_camera->GetCameraViewMat(), local);
+
+		//turn the transformed points into our picking vector. 
+		XMVECTOR pickingVector = farPoint - nearPoint;
+		pickingVector = XMVector3Normalize(pickingVector);
+
+		//loop through mesh list for object
+		for (int y = 0; y < m_displayList[i].m_model.get()->meshes.size(); y++)
+		{
+			//checking for ray intersection
+			if (m_displayList[i].m_model.get()->meshes[y]->boundingBox.Intersects(nearPoint, pickingVector, pickedDistance))
+			{
+				selectedID = i;
+				if (pickedDistance > 0 && pickedDistance < nearestPickedDistance) {
+					nearestPickedDistance = pickedDistance;
+					nearestSelectedID = selectedID;
+				}
+			}
+		}
+	}
+
+	//if we got a hit.  return it.  
+	return nearestSelectedID;
+}
+
 
 // Helper method to clear the back buffers.
 void Game::Clear()

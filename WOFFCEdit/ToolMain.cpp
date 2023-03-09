@@ -19,6 +19,10 @@ ToolMain::ToolMain()
 	m_toolInputCommands.left		= false;
 	m_toolInputCommands.right		= false;
 	
+	m_toolInputCommands.mouse_RB_Down = false;
+	m_toolInputCommands.mouse_LB_Down = false;
+	m_toolInputCommands.mouse_x = 0;
+	m_toolInputCommands.mouse_y = 0;
 }
 
 
@@ -287,6 +291,13 @@ void ToolMain::Tick(MSG *msg)
 		//add to scenegraph
 		//resend scenegraph to Direct X renderer
 
+	if (m_toolInputCommands.mouse_LB_Down)
+	{
+		m_selectedObject = m_d3dRenderer.MousePicking();
+		m_toolInputCommands.mouse_LB_Down = false;
+	}
+
+
 	//Renderer Update Call
 	m_d3dRenderer.Tick(&m_toolInputCommands);
 }
@@ -307,36 +318,35 @@ void ToolMain::UpdateInput(MSG * msg)
 
 	case WM_NCRBUTTONDOWN: case WM_NCRBUTTONUP: case WM_NCMOUSEMOVE:
 		//if mouse leaves active window area, disable it. not fully working ATM. this is optional
-		m_toolInputCommands.rmbIsDown = false;
-		m_toolInputCommands.mousePosX = 0;
-		m_toolInputCommands.mousePosY = 0;
+		m_toolInputCommands.mouse_RB_Down = false;
+		m_toolInputCommands.mouse_x = 0;
+		m_toolInputCommands.mouse_y = 0;
 		break;
 
-	case WM_MOUSEMOVE: {
-		if (m_toolInputCommands.rmbIsDown) {
-			m_toolInputCommands.mousePosX = GET_X_LPARAM(msg->lParam);
-			m_toolInputCommands.mousePosY = GET_Y_LPARAM(msg->lParam);
-		}
+	case WM_MOUSEMOVE:
+		m_toolInputCommands.mouse_x = GET_X_LPARAM(msg->lParam);
+		m_toolInputCommands.mouse_y = GET_Y_LPARAM(msg->lParam);
 		break;
-		}
-		
 
 	case WM_RBUTTONDOWN:
-		m_toolInputCommands.rmbIsDown = true;
+		m_toolInputCommands.mouse_RB_Down = true;
 		//right mouse button down,  you will probably need to check when its up too
 		//set some flag for the mouse button in inputcommands
-		m_toolInputCommands.mousePosX = GET_X_LPARAM(msg->lParam);
-		m_toolInputCommands.mousePosY = GET_Y_LPARAM(msg->lParam);
+		m_toolInputCommands.mouse_x = GET_X_LPARAM(msg->lParam);
+		m_toolInputCommands.mouse_y = GET_Y_LPARAM(msg->lParam);
 		break;
 	case WM_RBUTTONUP:
-		m_toolInputCommands.rmbIsDown = false;
+		m_toolInputCommands.mouse_RB_Down = false;
 
 		//right mouse button down,  you will probably need to check when its up too
 		//set some flag for the mouse button in inputcommands
-		m_toolInputCommands.mousePosX = 0;
-		m_toolInputCommands.mousePosY = 0;
+		m_toolInputCommands.mouse_x = 0;
+		m_toolInputCommands.mouse_y = 0;
 		break;
-	
+	case WM_LBUTTONDOWN:
+		//mouse left pressed.	
+		m_toolInputCommands.mouse_LB_Down = true;
+		break;
 	}
 	//here we update all the actual app functionality that we want.  This information will either be used int toolmain, or sent down to the renderer (Camera movement etc
 	//WASD movement
