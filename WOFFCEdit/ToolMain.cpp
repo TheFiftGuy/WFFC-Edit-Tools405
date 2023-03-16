@@ -18,9 +18,11 @@ ToolMain::ToolMain()
 	m_toolInputCommands.back		= false;
 	m_toolInputCommands.left		= false;
 	m_toolInputCommands.right		= false;
-	
+	m_toolInputCommands.up = false;
+	m_toolInputCommands.down = false;
+	//m_toolInputCommands.mouse_LB_DblDown = false;
 	m_toolInputCommands.mouse_RB_Down = false;
-	m_toolInputCommands.mouse_LB_Down = false;
+	//m_toolInputCommands.mouse_LB_Down = false;
 	m_toolInputCommands.mouse_x = 0;
 	m_toolInputCommands.mouse_y = 0;
 }
@@ -291,11 +293,14 @@ void ToolMain::Tick(MSG *msg)
 		//add to scenegraph
 		//resend scenegraph to Direct X renderer
 
-	if (m_toolInputCommands.mouse_LB_Down)
+	//D MOVE MOUSE PICKING CALL DIRECTLY TO MESSAGES
+
+	/*if (m_toolInputCommands.mouse_LB_Down)
 	{
 		m_selectedObject = m_d3dRenderer.MousePicking();
+
 		m_toolInputCommands.mouse_LB_Down = false;
-	}
+	}*/
 
 
 	//Renderer Update Call
@@ -343,9 +348,15 @@ void ToolMain::UpdateInput(MSG * msg)
 		m_toolInputCommands.mouse_x = 0;
 		m_toolInputCommands.mouse_y = 0;
 		break;
+	case WM_LBUTTONDBLCLK: //lmb double click
+		//m_toolInputCommands.mouse_LB_DblDown = true;
+		m_d3dRenderer.MouseFocusSelectedObject();
+		break;
 	case WM_LBUTTONDOWN:
+		m_selectedObject = m_d3dRenderer.MousePicking();
+
 		//mouse left pressed.	
-		m_toolInputCommands.mouse_LB_Down = true;
+		//m_toolInputCommands.mouse_LB_Down = true;
 		break;
 	}
 	//here we update all the actual app functionality that we want.  This information will either be used int toolmain, or sent down to the renderer (Camera movement etc
@@ -375,14 +386,14 @@ void ToolMain::UpdateInput(MSG * msg)
 	//rotation
 	if (m_keyArray['E'])
 	{
-		m_toolInputCommands.rotRight = true;
+		m_toolInputCommands.up = true;
 	}
-	else m_toolInputCommands.rotRight = false;
+	else m_toolInputCommands.up = false;
 	if (m_keyArray['Q'])
 	{
-		m_toolInputCommands.rotLeft = true;
+		m_toolInputCommands.down = true;
 	}
-	else m_toolInputCommands.rotLeft = false;
+	else m_toolInputCommands.down = false;
 
 	//WASD
 }

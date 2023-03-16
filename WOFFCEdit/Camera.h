@@ -24,6 +24,7 @@ private:
 	InputCommands*						m_InputCommands;
 	
 	int prevMouseX, prevMouseY;
+	bool postUpdateMoveCam = false;
 
 public:
 
@@ -35,6 +36,8 @@ public:
 	void SetInputCommand(InputCommands* Input);
 
 	DirectX::SimpleMath::Matrix GetCameraViewMat() const;
+
+	void LookAtObject(DirectX::SimpleMath::Vector3 ObjectPos);
 
 };
 

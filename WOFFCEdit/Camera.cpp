@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "InputCommands.h"
+#include <cmath>
 
 
 using namespace DirectX::SimpleMath;
@@ -17,9 +18,9 @@ Camera::Camera()
 	m_camPosition.y = 3.7f;
 	m_camPosition.z = -3.5f;
 
-	m_camOrientation.x = 0;
-	m_camOrientation.y = 0;
-	m_camOrientation.z = 0;
+	m_camOrientation.x = 0;//pitch
+	m_camOrientation.y = 0;//yaw
+	m_camOrientation.z = 0;//roll
 
 	m_camLookAt.x = 0.0f;
 	m_camLookAt.y = 0.0f;
@@ -33,10 +34,6 @@ Camera::Camera()
 	m_camRight.y = 0.0f;
 	m_camRight.z = 0.0f;
 
-	m_camOrientation.x = 0.0f;
-	m_camOrientation.y = 0.0f;
-	m_camOrientation.z = 0.0f;
-
 	prevMouseX = 0;
 	prevMouseY = 0;
 }
@@ -47,19 +44,11 @@ Camera::~Camera()
 
 void Camera::Update(DX::StepTimer const& timer)
 {
-	//TODO  any more complex than this, and the camera should be abstracted out to somewhere else
-	//camera motion is on a plane, so kill the 7 component of the look direction
-	Vector3 planarMotionVector = m_camLookDirection;
-	planarMotionVector.y = 0.0;
 
-	//if (m_InputCommands->rotRight)
-	//{
-	//	m_camOrientation.y -= m_camRotRate;
-	//}
-	//if (m_InputCommands->rotLeft)
-	//{
-	//	m_camOrientation.y += m_camRotRate;
-	//}
+	if (postUpdateMoveCam) {
+		postUpdateMoveCam = false;
+		return;
+	}
 
 	if ((m_InputCommands->mouse_x > 0 || m_InputCommands->mouse_y > 0) && m_InputCommands->mouse_RB_Down == true) {
 
@@ -101,7 +90,6 @@ void Camera::Update(DX::StepTimer const& timer)
 		prevMouseY = 0;
 	}
 
-
 	//forward.x = cos(radians(yaw)) * cos(radians(pitch));
 	//forward.y = sin(radians(pitch));
 	//forward.z = sin(radians(yaw)) * cos(radians(pitch));
@@ -135,7 +123,15 @@ void Camera::Update(DX::StepTimer const& timer)
 	{
 		m_camPosition -= m_camRight * m_movespeed;
 	}
-
+	//moves the Camera staright up down in world space, not in camera up direction
+	if (m_InputCommands->up)
+	{
+		m_camPosition += Vector3::UnitY * m_movespeed;
+	}
+	if (m_InputCommands->down)
+	{
+		m_camPosition -= Vector3::UnitY * m_movespeed;
+	}
 
 	//update lookat point
 	m_camLookAt = m_camPosition + m_camLookDirection;
@@ -153,3 +149,52 @@ DirectX::SimpleMath::Matrix Camera::GetCameraViewMat() const
 {
 	return m_view;
 }
+
+void Camera::LookAtObject(DirectX::SimpleMath::Vector3 ObjectPos)
+{
+
+	
+	postUpdateMoveCam = true;
+
+	Vector3 junk;
+	Quaternion rot;
+	m_view.Decompose(junk, rot, junk);
+	rot.Normalize();
+	Vector3 eul = rot.ToEuler();
+
+	m_view = Matrix::CreateLookAt(m_camPosition, ObjectPos, Vector3::UnitY);
+
+	m_view.Decompose(junk, rot, junk);
+	rot.Normalize();
+	Vector3 eul2 = rot.ToEuler();
+	
+
+	eul *= (180 / 3.141592);
+	eul2 *= (180 / 3.141592);
+
+	Vector3 deltaEul = eul2 - eul;
+	deltaEul.x = 0;
+
+	m_camOrientation.x -= deltaEul.z;
+	m_camOrientation.y += deltaEul.y;
+
+	if (m_camOrientation.x > 89.0f) {
+		m_camOrientation.x = 89.0f;
+	}
+	if (m_camOrientation.x < -89.0f) {
+		m_camOrientation.x = -89.0f;
+	}
+
+	if (m_camOrientation.y < 0.0f) {
+		m_camOrientation.y += 360.0f;
+	}
+	if (m_camOrientation.y > 360.0f) {
+		m_camOrientation.y -= 360.0f;
+	}
+
+	prevMouseX = 0;
+	prevMouseY = 0;
+	
+}
+
+

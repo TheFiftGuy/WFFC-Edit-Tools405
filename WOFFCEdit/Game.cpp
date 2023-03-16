@@ -147,52 +147,6 @@ void Game::Tick(InputCommands *Input)
 // Updates the world.
 void Game::Update(DX::StepTimer const& timer)
 {
-	//TODO  any more complex than this, and the camera should be abstracted out to somewhere else
-	//camera motion is on a plane, so kill the 7 component of the look direction
-	//Vector3 planarMotionVector = m_camLookDirection;
-	//planarMotionVector.y = 0.0;
-
-	//if (m_InputCommands.rotRight)
-	//{
-	//	m_camOrientation.y -= m_camRotRate;
-	//}
-	//if (m_InputCommands.rotLeft)
-	//{
-	//	m_camOrientation.y += m_camRotRate;
-	//}
-
-	////create look direction from Euler angles in m_camOrientation
-	//m_camLookDirection.x = sin((m_camOrientation.y)*3.1415 / 180);
-	//m_camLookDirection.z = cos((m_camOrientation.y)*3.1415 / 180);
-	//m_camLookDirection.Normalize();
-
-	////create right vector from look Direction
-	//m_camLookDirection.Cross(Vector3::UnitY, m_camRight);
-
-	////process input and update stuff
-	//if (m_InputCommands.forward)
-	//{	
-	//	m_camPosition += m_camLookDirection*m_movespeed;
-	//}
-	//if (m_InputCommands.back)
-	//{
-	//	m_camPosition -= m_camLookDirection*m_movespeed;
-	//}
-	//if (m_InputCommands.right)
-	//{
-	//	m_camPosition += m_camRight*m_movespeed;
-	//}
-	//if (m_InputCommands.left)
-	//{
-	//	m_camPosition -= m_camRight*m_movespeed;
-	//}
-
-	////update lookat point
-	//m_camLookAt = m_camPosition + m_camLookDirection;
-
-	////apply camera vectors
-    //m_view = Matrix::CreateLookAt(m_camPosition, m_camLookAt, Vector3::UnitY);
-
 	m_camera->Update(timer);
 
     m_batchEffect->SetView(m_camera->GetCameraViewMat());
@@ -344,6 +298,15 @@ int Game::MousePicking()
 
 	//if we got a hit.  return it.  
 	return nearestSelectedID;
+}
+
+int Game::MouseFocusSelectedObject()
+{
+	int objID = MousePicking();
+	//DirectX::SimpleMath::Vector3 objPos = m_displayList[objID].m_position;
+	if (m_displayList.size() > 0 && objID >= 0 && objID <= m_displayList.size())
+		m_camera->LookAtObject(m_displayList[objID].m_position);
+	return objID;
 }
 
 

@@ -35,6 +35,7 @@ public:
 
 	//D mouse picking
 	int MousePicking();
+	int MouseFocusSelectedObject();
 
 	// Rendering helpers
 	void Clear();
