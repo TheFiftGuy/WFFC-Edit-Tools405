@@ -34,7 +34,7 @@ public:
 	void Render();
 
 	//D mouse picking
-	int MousePicking();
+	std::wstring MousePicking();
 	int MouseFocusSelectedObject();
 
 	// Rendering helpers

@@ -69,8 +69,8 @@ int MFCMain::Run()
 		}
 		else
 		{	
-			int ID = m_ToolSystem.getCurrentSelectionID();
-			std::wstring statusString = L"Selected Object: " + std::to_wstring(ID);
+			
+			std::wstring statusString = L"Selected Object: " + m_ToolSystem.getCurrentSelectionNameAndID();
 			m_ToolSystem.Tick(&msg);
 
 			//send current object ID to status bar in The main frame
