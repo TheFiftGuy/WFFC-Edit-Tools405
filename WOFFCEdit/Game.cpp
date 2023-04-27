@@ -14,7 +14,6 @@ using namespace DirectX::SimpleMath;
 using Microsoft::WRL::ComPtr;
 
 Game::Game()
-
 {
     m_deviceResources = std::make_unique<DX::DeviceResources>();
     m_deviceResources->RegisterDeviceNotify(this);
@@ -237,12 +236,13 @@ void Game::Render()
 	//Render the batch,  This is handled in the Display chunk becuase it has the potential to get complex
 	m_displayChunk.RenderBatch(m_deviceResources);
 
-	//CAMERA POSITION ON HUD
-	m_sprites->Begin();
-	//WCHAR   Buffer[256];
-	std::wstring var = L"Cam X: " + std::to_wstring(/*m_camPosition.x*/ 0.0f) + L"Cam Z: " + std::to_wstring(/*m_camPosition.z*/0.0f);
-	m_font->DrawString(m_sprites.get(), var.c_str(), XMFLOAT2(100, 10), Colors::Yellow);
-	m_sprites->End();
+	////CAMERA POSITION ON HUD
+	//m_sprites->Begin();
+	////WCHAR   Buffer[256];
+	//std::wstring var = L"Cam X: " + std::to_wstring(/*m_camPosition.x*/ 0.0f) + L"Cam Z: " + std::to_wstring(/*m_camPosition.z*/0.0f);
+	//m_font->DrawString(m_sprites.get(), var.c_str(), XMFLOAT2(100, 10), Colors::Yellow);
+	//m_sprites->End();
+
 
     m_deviceResources->Present();
 }
@@ -317,8 +317,10 @@ int Game::MouseFocusSelectedObject()
 {
 	int objID = std::stoi(MousePicking());
 	//DirectX::SimpleMath::Vector3 objPos = m_displayList[objID].m_position;
-	if (m_displayList.size() > 0 && objID >= 0 && objID <= m_displayList.size())
+	if (m_displayList.size() > 0 && objID >= 0 && objID <= m_displayList.size()) {
 		m_camera->LookAtObject(m_displayList[objID].m_position);
+		m_camera->InterpolateNearPosition(m_displayList[objID].m_position, 5.f, 0.5f);
+	}
 	return objID;
 }
 

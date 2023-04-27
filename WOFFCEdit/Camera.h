@@ -26,6 +26,13 @@ private:
 	int prevMouseX, prevMouseY;
 	bool postUpdateMoveCam = false;
 
+	//Cam focus lerp stuff
+	float LerpTime;
+	float RemainingLerpTime;
+	DirectX::SimpleMath::Vector3 LerpFrom;
+	DirectX::SimpleMath::Vector3 LerpTo;
+
+
 public:
 
 	Camera();
@@ -38,6 +45,13 @@ public:
 	DirectX::SimpleMath::Matrix GetCameraViewMat() const;
 
 	void LookAtObject(DirectX::SimpleMath::Vector3 ObjectPos);
+
+	//Lerp over Time near TargetPosition but keep a distance of NearDistance. (Approach but keep a NearDistance) 
+	void InterpolateNearPosition(DirectX::SimpleMath::Vector3 TargetPosition, float NearDistance = 5.f, float Time = 1.f);
+
+private:
+
+	void InterpolateUpdate(DX::StepTimer const& timer);
 
 };
 

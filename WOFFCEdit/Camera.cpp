@@ -36,6 +36,11 @@ Camera::Camera()
 
 	prevMouseX = 0;
 	prevMouseY = 0;
+
+	LerpTime = 0.f;
+	RemainingLerpTime = 0.f;
+	LerpFrom = Vector3();
+	LerpTo = Vector3();
 }
 
 Camera::~Camera()
@@ -133,6 +138,11 @@ void Camera::Update(DX::StepTimer const& timer)
 		m_camPosition -= Vector3::UnitY * m_movespeed;
 	}
 
+	//D new cam lerp
+	if (RemainingLerpTime > 0.f) {
+		InterpolateUpdate(timer);
+	}
+
 	//update lookat point
 	m_camLookAt = m_camPosition + m_camLookDirection;
 
@@ -195,6 +205,37 @@ void Camera::LookAtObject(DirectX::SimpleMath::Vector3 ObjectPos)
 	prevMouseX = 0;
 	prevMouseY = 0;
 	
+}
+
+void Camera::InterpolateNearPosition(Vector3 TargetPosition, float NearDistance, float Time)
+{
+
+	float distance = Vector3::Distance(m_camPosition, TargetPosition);
+	if (distance > NearDistance)
+		distance -= NearDistance;
+	else {
+		LerpTime = 0.f;
+		RemainingLerpTime = 0.f;
+		LerpTo = Vector3();
+		LerpFrom = Vector3();
+		return;
+	}
+	LerpTime = Time;
+	RemainingLerpTime = Time;
+	LerpFrom = m_camPosition;
+	Vector3 NearPos = TargetPosition - m_camPosition;
+
+	NearPos.Normalize();
+	NearPos = m_camPosition + (distance * NearPos);
+	LerpTo = NearPos;
+}
+
+void Camera::InterpolateUpdate(DX::StepTimer const& timer)
+{
+	
+	RemainingLerpTime -= timer.GetElapsedSeconds();
+	float lerpFactor = (LerpTime - RemainingLerpTime) / LerpTime;
+	m_camPosition = Vector3::Lerp(LerpFrom, LerpTo, lerpFactor);
 }
 
 
