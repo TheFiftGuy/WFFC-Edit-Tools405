@@ -56,6 +56,11 @@ public:
 	void BuildDisplayChunk(ChunkObject *SceneChunk);
 	void SaveDisplayChunk(ChunkObject *SceneChunk);	//saves geometry et al
 	void ClearDisplayList();
+	void RandomizeDisplayChunk();
+	void SetChunkAmp(const float amp_) { m_displayChunk.SetTerrainAmplitude(amp_); }
+	void SetChunkFreq(const float freq_) { m_displayChunk.SetTerrainFrequency(freq_); }
+
+
 
 #ifdef DXTK_AUDIO
 	void NewAudioDevice();

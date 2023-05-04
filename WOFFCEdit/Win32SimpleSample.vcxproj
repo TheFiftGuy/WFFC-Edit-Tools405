@@ -174,8 +174,10 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MFCFrame.cpp" />
     <ClCompile Include="MFCRenderFrame.cpp" />
+    <ClCompile Include="Noise3D.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="MFCMain.cpp" />
+    <ClCompile Include="RandomiseDialogue.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="SelectDialogue.cpp" />
     <ClCompile Include="sqlite3.c" />
@@ -191,7 +193,9 @@
     <ClInclude Include="InputCommands.h" />
     <ClInclude Include="MFCFrame.h" />
     <ClInclude Include="MFCRenderFrame.h" />
+    <ClInclude Include="Noise3D.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="RandomiseDialogue.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="SelectDialogue.h" />

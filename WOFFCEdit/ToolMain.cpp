@@ -283,6 +283,11 @@ void ToolMain::onActionSaveTerrain()
 	m_d3dRenderer.SaveDisplayChunk(&m_chunk);
 }
 
+void ToolMain::onActionTerrainRandomize() {
+	m_d3dRenderer.RandomizeDisplayChunk();
+}
+
+
 void ToolMain::Tick(MSG *msg)
 {
 	//do we have a selection

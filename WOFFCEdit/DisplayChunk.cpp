@@ -13,11 +13,16 @@ DisplayChunk::DisplayChunk()
 	m_terrainHeightScale = 0.25;  //convert our 0-256 terrain to 64
 	m_textureCoordStep = 1.0 / (TERRAINRESOLUTION-1);	//-1 becuase its split into chunks. not vertices.  we want tthe last one in each row to have tex coord 1
 	m_terrainPositionScalingFactor = m_terrainSize / (TERRAINRESOLUTION-1);
+
+	NoiseGenerator = new Noise3D();
 }
 
 
 DisplayChunk::~DisplayChunk()
 {
+	if (NoiseGenerator) {
+		delete NoiseGenerator;
+	}
 }
 
 void DisplayChunk::PopulateChunkData(ChunkObject * SceneChunk)
@@ -181,7 +186,19 @@ void DisplayChunk::UpdateTerrain()
 
 void DisplayChunk::GenerateHeightmap()
 {
-	//insert how YOU want to update the heigtmap here! :D
+	float variance = rand() % 100;
+	float amplitude = m_terrainAmplitude + variance / 5.f;
+	float frequency = (m_terrainFrequency + (variance/1000.f)) / TERRAINRESOLUTION;
+	float offset = variance - variance/2; // offset range = [-0.5 Variance, 0.5 Variance]
+
+
+	for (int i = 0; i < TERRAINRESOLUTION; i++) {
+		for (int j = 0; j < TERRAINRESOLUTION; j++) {
+			//m_terrainGeometry[i][j].position.y = (m_terrainGeometry[i][j].position.y >= 0) ? m_terrainGeometry[i][j].position.y : m_terrainGeometry[i][j].position.y++;
+			m_terrainGeometry[i][j].position.y = NoiseGenerator->Noise((m_terrainGeometry[i][j].position.x + offset) * frequency, (m_terrainGeometry[i][j].position.z + offset) * frequency, (m_terrainGeometry[i][j].position.y + offset) * frequency) * amplitude;
+		}
+	}
+	CalculateTerrainNormals();
 }
 
 void DisplayChunk::CalculateTerrainNormals()

@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "DeviceResources.h"
 #include "ChunkObject.h"
+#include "Noise3D.h"
 
 //geometric resoltuion - note,  hard coded.
 #define TERRAINRESOLUTION 128
@@ -35,6 +36,9 @@ private:
 	float	m_textureCoordStep;			//step in texture coordinates between each vertex row / column
 	float   m_terrainPositionScalingFactor;	//factor we multiply the position by to convert it from its native resolution( 0- Terrain Resolution) to full scale size in metres dictated by m_Terrainsize
 	
+	float m_terrainAmplitude = 30;
+	float m_terrainFrequency = 1;
+
 	std::string m_name;
 	int m_chunk_x_size_metres;
 	int m_chunk_y_size_metres;
@@ -53,6 +57,12 @@ private:
 	int m_tex_splat_2_tiling;
 	int m_tex_splat_3_tiling;
 	int m_tex_splat_4_tiling;
+
+	Noise3D* NoiseGenerator;
+
+public:
+	void SetTerrainAmplitude(const float amp_) { m_terrainAmplitude = amp_; }
+	void SetTerrainFrequency(const float freq_) { m_terrainFrequency = freq_; }
 
 };
 
