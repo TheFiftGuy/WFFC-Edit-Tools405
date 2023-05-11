@@ -70,17 +70,24 @@ void DisplayChunk::InitialiseBatch()
 	//build geometry for our terrain array
 	//iterate through all the vertices of our required resolution terrain.
 	int index = 0;
+	for (size_t i = 0; i < TERRAINRESOLUTION; i++) {
+		for (size_t j = 0; j < TERRAINRESOLUTION; j++) {
 
-	for (size_t i = 0; i < TERRAINRESOLUTION; i++)
-	{
-		for (size_t j = 0; j < TERRAINRESOLUTION; j++)
-		{
-			index = (TERRAINRESOLUTION * i) + j;
-			m_terrainGeometry[i][j].position =			Vector3(j*m_terrainPositionScalingFactor-(0.5*m_terrainSize), (float)(m_heightMap[index]) * m_terrainHeightScale, i*m_terrainPositionScalingFactor-(0.5*m_terrainSize));	//This will create a terrain going from -64->64.  rather than 0->128.  So the center of the terrain is on the origin
-			m_terrainGeometry[i][j].normal =			Vector3(0.0f, 1.0f, 0.0f);						//standard y =up
-			m_terrainGeometry[i][j].textureCoordinate =	Vector2(((float)m_textureCoordStep*j)*m_tex_diffuse_tiling, ((float)m_textureCoordStep*i)*m_tex_diffuse_tiling);				//Spread tex coords so that its distributed evenly across the terrain from 0-1
+			index = (TERRAINRESOLUTION * i) + j * sizeof(float);
+
+			float* height = reinterpret_cast<float*>(&m_heightMap[index]);
+			
+
+			m_terrainGeometry[i][j].position = Vector3(	j * m_terrainPositionScalingFactor - (0.5 * m_terrainSize),
+														*height * m_terrainHeightScale,
+														i * m_terrainPositionScalingFactor - (0.5 * m_terrainSize));	//This will create a terrain going from -64->64.  rather than 0->128.  So the center of the terrain is on the origin
+			m_terrainGeometry[i][j].normal = Vector3(0.0f, 1.0f, 0.0f);						//standard y =up
+			m_terrainGeometry[i][j].textureCoordinate = Vector2(((float)m_textureCoordStep * j) * m_tex_diffuse_tiling, ((float)m_textureCoordStep * i) * m_tex_diffuse_tiling);
+
+			
 		}
 	}
+
 	CalculateTerrainNormals();
 	
 }
@@ -106,7 +113,7 @@ void DisplayChunk::LoadHeightMap(std::shared_ptr<DX::DeviceResources>  DevResour
 
 	// Here We Load The .RAW File Into Our pHeightMap Data Array
 	// We Are Only Reading In '1', And The Size Is (Width * Height)
-	fread(m_heightMap, 1, TERRAINRESOLUTION*TERRAINRESOLUTION, pFile);
+	size_t itemsRead = fread(m_heightMap, 1, (TERRAINRESOLUTION * TERRAINRESOLUTION * sizeof(float)), pFile);
 
 	fclose(pFile);
 
@@ -162,24 +169,25 @@ void DisplayChunk::SaveHeightMap()
 		return;
 	}
 
-	fwrite(m_heightMap, 1, TERRAINRESOLUTION*TERRAINRESOLUTION, pFile);
+	size_t itemsWritten = fwrite(m_heightMap, 1, (TERRAINRESOLUTION * TERRAINRESOLUTION * sizeof(float)), pFile);
 	fclose(pFile);
 	
 }
 
+//THIS IS DEPRECATED/UNUSED
 void DisplayChunk::UpdateTerrain()
 {
-	//all this is doing is transferring the height from the heigtmap into the terrain geometry.
-	int index;
-	for (size_t i = 0; i < TERRAINRESOLUTION; i++)
-	{
-		for (size_t j = 0; j < TERRAINRESOLUTION; j++)
-		{
-			index = (TERRAINRESOLUTION * i) + j;
-			m_terrainGeometry[i][j].position.y = (float)(m_heightMap[index])*m_terrainHeightScale;	
-		}
-	}
-	CalculateTerrainNormals();
+	////all this is doing is transferring the height from the heigtmap into the terrain geometry.
+	//int index;
+	//for (size_t i = 0; i < TERRAINRESOLUTION; i++)
+	//{
+	//	for (size_t j = 0; j < TERRAINRESOLUTION; j++)
+	//	{
+	//		index = (TERRAINRESOLUTION * i) + j * sizeof(float);
+	//		m_terrainGeometry[i][j].position.y = (float)(m_heightMap[index])*m_terrainHeightScale;	
+	//	}
+	//}
+	//CalculateTerrainNormals();
 
 }
 
@@ -189,7 +197,6 @@ void DisplayChunk::GenerateHeightmap()
 	float amplitude = m_terrainAmplitude + variance / 5.f;
 	float frequency = (m_terrainFrequency + (variance/1000.f)) / TERRAINRESOLUTION;
 	float offset = variance - variance/2; // offset range = [-0.5 Variance, 0.5 Variance]
-
 	int index = 0;
 	for (size_t i = 0; i < TERRAINRESOLUTION; i++)	{
 		for (size_t j = 0; j < TERRAINRESOLUTION; j++)	{
@@ -197,8 +204,15 @@ void DisplayChunk::GenerateHeightmap()
 			m_terrainGeometry[i][j].position.y = NoiseGenerator->Noise(	(m_terrainGeometry[i][j].position.x + offset) * frequency, 
 																		(m_terrainGeometry[i][j].position.y + offset) * frequency, 
 																		(m_terrainGeometry[i][j].position.z + offset) * frequency	) * amplitude;
-			index = (TERRAINRESOLUTION * i) + j;
-			m_heightMap[index] = (BYTE)(m_terrainGeometry[i][j].position.y / m_terrainHeightScale);
+
+			index = (TERRAINRESOLUTION * i) + j * sizeof(float);
+
+			float height = (m_terrainGeometry[i][j].position.y / m_terrainHeightScale);
+			BYTE* heightByte = reinterpret_cast<BYTE*>(&height);
+			for (int k = 0; k < sizeof(float); k++) {
+				m_heightMap[index + k] = heightByte[k];
+
+			}
 		}
 	}
 	CalculateTerrainNormals();

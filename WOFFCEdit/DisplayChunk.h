@@ -28,7 +28,7 @@ public:
 private:
 	
 	DirectX::VertexPositionNormalTexture m_terrainGeometry[TERRAINRESOLUTION][TERRAINRESOLUTION];
-	BYTE m_heightMap[TERRAINRESOLUTION*TERRAINRESOLUTION];
+	BYTE m_heightMap[TERRAINRESOLUTION*TERRAINRESOLUTION * sizeof(float)];
 	void CalculateTerrainNormals();
 
 	float	m_terrainHeightScale;
